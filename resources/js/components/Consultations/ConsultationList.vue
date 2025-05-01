@@ -25,12 +25,20 @@
                 <option value="specialiste">Spécialiste</option>
               </select>
             </div>
-            <button 
+            <!-- <button 
               class="btn btn-primary btn-sm"
               @click="$emit('new-consultation')"
             >
               <i class="fas fa-plus"></i> Nouvelle consultation
-            </button>
+            </button> -->
+            <router-link 
+              :to="{ name: 'NewConsultation'}" 
+              class="btn btn-primary btn-sm" 
+              title="Nouvelle consultation"
+            >
+              <i class="fas fa-plus"></i> Nouvelle consultation
+            </router-link>
+
           </div>
         </div>
   
@@ -102,6 +110,12 @@
               </tbody>
             </table>
           </div>
+        </div>
+        <div style="display:flex;float:left;">
+          <router-link to="/dashboard" class="btn btn-outline-primary text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>
+                Retour
+          </router-link>
         </div>
       </div>
   

@@ -105,13 +105,21 @@
                 <div class="invalid-feedback">{{ errors.email }}</div>
               </div>
   
-              <div class="col-12">
+              <div class="col-6">
                 <label class="form-label">Adresse</label>
                 <textarea 
                   class="form-control"
                   v-model="formData.adresse"
-                  rows="2"
                 ></textarea>
+              </div>
+              <div class="col-6"> 
+                <label class="form-label">localisation</label>
+                <select class="form-select" v-model="formData.localisation_id" :class="{ 'is-invalid': errors.localisation_id }">
+                  <option value="">Sélectionner</option>
+                  <option v-for="loc in localisations" :key="loc.localisation_id" :value="loc.localisation_id">
+                    {{ loc.region }} - {{ loc.district_sanitaire }}
+                  </option>
+                </select>
               </div>
   
               <div class="col-md-6">
@@ -183,13 +191,17 @@
         <!-- Boutons de soumission -->
         <div class="col-12">
           <div class="d-flex justify-content-end gap-2">
-            <button 
+            <!-- <button 
               type="button" 
               class="btn btn-secondary"
               @click="$emit('cancel')"
             >
               Annuler
-            </button>
+            </button> -->
+            <router-link to="/dashboard" class="btn btn-outline-primary text-decoration-none">
+              <i class="fas fa-arrow-left me-2"></i>
+              Annuler
+            </router-link>
             <button 
               type="submit" 
               class="btn btn-primary"
@@ -211,6 +223,13 @@
     
     import { ref, computed, onMounted, watch } from 'vue';
     import { usePatients } from '@/composables/usePatients';
+    import { useLocalisations } from '@/composables/useLocalisations';
+
+
+
+// Importer le composable pour localisations
+const { localisations, fetchLocalisations } = useLocalisations();
+
 
     const props = defineProps({
     patient: {
@@ -386,9 +405,10 @@
 
     // Hooks
     onMounted(() => {
-    if (props.patient) {
-        initializeForm(props.patient);
-    }
+      if (props.patient) {
+          initializeForm(props.patient);
+        }
+        fetchLocalisations();
     });
 
   </script>

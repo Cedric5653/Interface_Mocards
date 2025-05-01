@@ -20,10 +20,26 @@ const apiClient = axios.create({
 
 
 // Interceptor pour inclure le jeton d'authentification dans toutes les requêtes
+// apiClient.interceptors.request.use(
+//   (config) => {
+//     loadingState.value.loadingCounter++;
+//     loading.value = loadingState.value.loadingCounter > 0;
+//     return config;
+//   },
+//   (error) => {
+//     loadingState.value.loadingCounter--;
+//     return Promise.reject(error);
+//   }
+// );
+
 apiClient.interceptors.request.use(
   (config) => {
     loadingState.value.loadingCounter++;
     loading.value = loadingState.value.loadingCounter > 0;
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {

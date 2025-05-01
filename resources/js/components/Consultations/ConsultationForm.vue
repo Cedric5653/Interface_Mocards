@@ -3,6 +3,18 @@
         <div class="card">
             <div class="card-body">
                 <div class="row g-3">
+                    <!-- select patient -->
+                    <div class="col-md-6">
+                        <label class="form-label required">Patient</label>
+                        <select class="form-select" v-model="formData.patient_id" required>
+                            <option value="">Sélectionner un patient</option>
+                            <option v-for="pat in patientsList" :key="pat.patient_id" :value="pat.patient_id">
+                            {{ pat.nom }} {{ pat.prenom }}
+                            </option>
+                        </select>
+                    </div>
+
+
                     <!-- Type de consultation -->
                     <div class="col-md-6">
                         <label class="form-label required">Type de consultation</label>
@@ -112,13 +124,16 @@
 
             <div class="card-footer">
                 <div class="d-flex justify-content-end gap-2">
-                    <button 
+                    <!-- <button 
                         type="button" 
                         class="btn btn-secondary"
                         @click="$emit('cancel')"
                     >
                         Annuler
-                    </button>
+                    </button> -->
+                    <router-link to="/dashboard" class="btn btn-secondary text-decoration-none">
+                            Annuler
+                    </router-link>
                     <button 
                         type="submit" 
                         class="btn btn-primary"
@@ -141,6 +156,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useConsultations } from '@/composables/useConsultations';
+
+import { usePatients } from '@/composables/usePatients';
+import { useRouter } from 'vue-router';
+
+
+
+
+const { fetchPatients, patients } = usePatients();
+const patientsList = ref([]);
 
 const props = defineProps({
     patientId: {
@@ -175,6 +199,7 @@ const formData = ref({
     medecin_id: null // Sera rempli automatiquement côté serveur
 });
 
+
 // Composables
 const { createConsultation, updateConsultation } = useConsultations();
 
@@ -190,7 +215,22 @@ const initializeForm = () => {
 };
 
 const handleSubmit = async () => {
+    
     try {
+        // Conversion du format de date si nécessaire
+        if (formData.value.date_consultation) {
+            formData.value.date_consultation = new Date(formData.value.date_consultation)
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
+        }
+        // Mapper le champ motif sur observations si nécessaire
+        if (formData.value.motif) {
+            formData.value.observations = formData.value.motif;
+        }
+
+        console.log('Données envoyées:', formData.value);
+
         loading.value = true;
         let response;
 
@@ -239,7 +279,11 @@ const handleError = (error) => {
 // Lifecycle hooks
 onMounted(() => {
     initializeForm();
+    const res = fetchPatients();
+    // Ici, nous supposons que fetchPatients retourne un objet paginé ; on extrait l'array
+    patientsList.value = res.data.data.data || res.data.data;
 });
+
 </script>
 
 <style scoped>

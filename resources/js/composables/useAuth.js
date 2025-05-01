@@ -50,10 +50,10 @@ export function useAuth() {
             });
             
             if (response.data.status === 'success') {
-                user.value = response.data.user;
+                user.value = response.data.data;
                 isAuthenticated.value = true;
-                localStorage.setItem('token', response.data.access_token);
-                api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
+                localStorage.setItem('token', response.data.token);
+                api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
                 setApiResponse(response.data);
                 return response.data;
             } else {
@@ -69,6 +69,18 @@ export function useAuth() {
         }
     };
 
+    // Get User Profile
+    const getUserProfile = async () => {
+        try {
+            const response = await api.get('/v1/auth/user-profile');
+            user.value = response.data.data;
+            return response.data.data;
+        } catch (error) {
+            console.error("Erreur lors de la récupération du profil:", error);
+            throw error;
+        }
+    };
+    
     // Logout
     const logout = async () => {
         try {
@@ -87,13 +99,18 @@ export function useAuth() {
     const checkAuth = async () => {
         try {
             const token = localStorage.getItem('token');
+            // if (!token) return false;
             if (!token) {
+                isAuthenticated.value = false;
                 return false;
             }
-
+    
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             const response = await api.get('/v1/auth/user');
+            
+            // Structure cohérente avec getUserProfile
             user.value = response.data.data;
+            
             isAuthenticated.value = true;
             return true;
         } catch (error) {
@@ -105,17 +122,7 @@ export function useAuth() {
         }
     };
 
-    // Get User Profile
-    const getUserProfile = async (formData) => {
-        try {
-            const response = await api.get('/v1/auth/user-profile',formData);
-            user.value = response.data.data;
-            return response.data;
-        } catch (error) {
-            console.error("Erreur lors de la récupération du profil:", error);
-            throw error;
-        }
-    };
+    
 
     // Update User Profile
     const updateUserProfile = async (profileData) => {

@@ -6,7 +6,7 @@ import  api  from '@/services/api';
 import { useApiResponse } from './useApiResponse';
 
 export function useDashboard() {
-    const { user } = useAuth();
+    const { user,checkAuth } = useAuth();
     const stats = ref({
         patients: 0,
         consultations: 0,
@@ -23,29 +23,35 @@ export function useDashboard() {
     const alerts = ref([]);
     const { loading, message, setApiResponse } = useApiResponse();
 
-    // Calcul des autorisations basé sur le rôle
+   
+    
     const authorizedActions = computed(() => {
-        const userRole = user.value?.role?.toLowerCase() || '';
-        
-        // Définir les rôles autorisés pour chaque action
-        const rolePermissions = {
-            canAddPatient: ['admin', 'medecin'],
-            canAddAppointment: ['admin', 'medecin', 'infirmier'],
-            canViewUrgent: ['admin', 'medecin', 'infirmier', 'secouriste'],
-            canManageDocuments: ['admin', 'medecin']
-        };
-
+        const roleName = user.value?.role?.role_name?.toLowerCase() || '';
         return {
-            canAddPatient: rolePermissions.canAddPatient.includes(userRole),
-            canAddAppointment: rolePermissions.canAddAppointment.includes(userRole),
-            canViewUrgent: rolePermissions.canViewUrgent.includes(userRole),
-            canManageDocuments: rolePermissions.canManageDocuments.includes(userRole)
+            canAddPatient: ['admin', 'médecin'].includes(roleName),
+            canAddAppointment: ['admin', 'médecin', 'infirmier'].includes(roleName),
+            canViewUrgent: ['admin', 'médecin', 'infirmier', 'secouriste'].includes(roleName),
+            canManageDocuments: ['admin', 'médecin'].includes(roleName)
         };
     });
+    
 
     // Stats personnalisées selon le rôle avec gestion d'erreurs améliorée
     const fetchDashboardStats = async () => {
         try {
+
+            // if (!user.value) {
+            //     console.warn("Utilisateur non authentifié, attente...");
+            //     return;
+            // }
+            if (!user.value) {
+                const authenticated = await checkAuth();
+                if (!authenticated) {
+                    router.push('/login');
+                    return;
+                }
+            }
+            
             const response = await api.get('/v1/dashboard/stats', {
                 params: { role: user.value?.role }
             });

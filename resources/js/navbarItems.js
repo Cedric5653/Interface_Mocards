@@ -2,7 +2,7 @@ import Home from "./components/Home.vue";
 import Login from "./components/Auth/Login.vue";
 import Register from "./components/Auth/Register.vue";
 import CarteUrgenceView from "./components/CarteUrgence/CarteUrgenceView.vue";
-import DossierMedical from "./components/DossierMedical/DossierMedical.vue"; 
+// import DossierMedical from "./components/DossierMedical/DossierMedical.vue"; 
 import DossierMedicalList from "./components/DossierMedical/DossierMedicalList.vue"; 
 import Dashboard from "./components/Dashboard/Dashboard.vue"; 
 
@@ -63,14 +63,28 @@ const navItems = [
         component: Dashboard,
         protected: true
     },
+    // {
+    //     path: "/dossier-medical/:id",
+    //     label: "Dossier Médical",
+    //     name: "DossierMedical",
+    //     component: DossierMedical,
+    //     auth: true,
+    //     hideInNav: true
+    // },
     {
-        path: "/dossier-medical/:id",
-        label: "Dossier Médical",
-        name: "DossierMedical",
-        component: DossierMedical,
-        auth: true,
+        path: "/patients/:id",
+        name: "EditPatient",
+        component: () => import('./components/Patients/PatientDetails.vue'),
+        beforeEnter: (to, from, next) => {
+            if (!localStorage.getItem('token')) {
+                next('/login');
+            } else {
+                next();
+            }
+        },
+        protected: true,
         hideInNav: true
-    },
+    }, 
     {
         path: "/forgot-password",
         name: "ForgotPassword",
@@ -99,14 +113,15 @@ const navItems = [
         protected: true,
         hideInNav: true
     },
-    {
+     // Route pour afficher les détails du patient
+     {
         path: "/patients/:id",
-        name: "EditPatient",
-        component: () => import('./components/Patients/PatientDetails.vue'),
+        name: "PatientDetails",
+        component: () => import('@/components/Patients/PatientDetails.vue'),
         protected: true,
         hideInNav: true
-    },
-
+      },      
+      
     // rdv 
     {
         path: "/appointments",
@@ -129,6 +144,12 @@ const navItems = [
         protected: true,
         hideInNav: true
     },
+    {
+        path: "/consultations/new",
+        name: "NewConsultation",
+        component: () => import('./components/Consultations/ConsultationForm.vue'),
+        protected: true
+      },      
     // {
     //     path: "/appointments/:id",
     //     name: "EditAppointment",

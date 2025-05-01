@@ -42,8 +42,8 @@
             <option value="">Toutes les localisations</option>
             <option 
                 v-for="loc in localisations" 
-                :key="loc.id" 
-                :value="loc.id"
+                :key="loc.localisation_id" 
+                :value="loc.localisation_id"
             >
                 {{ loc.region }} - {{ loc.district_sanitaire }}
             </option>
@@ -164,6 +164,20 @@
                     <i class="fas fa-edit"></i>
                     </button>
                     <button 
+                      class="btn btn-sm btn-outline-info"
+                      @click.stop="viewPatientDetails(patient)"
+                      title="Voir les détails"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <!-- <router-link 
+                      :to="`/patients/${patient.patient_id}`" 
+                      class="btn btn-sm btn-outline-info" 
+                      title="Voir les détails"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </router-link> -->
+                    <button 
                     class="btn btn-sm btn-outline-danger"
                     @click.stop="confirmDelete(patient)"
                     title="Supprimer"
@@ -182,6 +196,10 @@
         <div>
             Affichage {{ startIndex + 1 }} à {{ endIndex }} sur {{ filteredPatients.length }} patients
         </div>
+        <router-link to="/dashboard" class="btn btn-outline-primary text-decoration-none">
+              <i class="fas fa-arrow-left me-2"></i>
+              Retour
+        </router-link>
         <nav v-if="totalPages > 1">
             <ul class="pagination mb-0">
             <li 
@@ -337,8 +355,8 @@
                   <option value="">Sélectionner</option>
                   <option 
                     v-for="loc in localisations" 
-                    :key="loc.id" 
-                    :value="loc.id"
+                    :key="loc.localisation_id" 
+                    :value="loc.localisation_id"
                   >
                     {{ loc.region }} - {{ loc.district_sanitaire }}
                   </option>
@@ -437,6 +455,13 @@
   import { Modal } from 'bootstrap';
   import { usePatients } from '@/composables/usePatients';
   import { useRouter } from 'vue-router';
+  import { useLocalisations } from '@/composables/useLocalisations';
+
+
+
+// Importer le composable pour localisations
+const { localisations, fetchLocalisations } = useLocalisations();
+
   
   // États
   const searchQuery = ref('');
@@ -446,7 +471,6 @@
   const saving = ref(false);
   const deleting = ref(false);
   const errors = ref({});
-  const localisations = ref([]);
   
   const formData = ref({
     nom: '',
@@ -616,9 +640,13 @@
         }
     };
 
-    const viewPatientDetails = (patient) => {
-        router.push(`/patients/${patient.patient_id}`);
+    const viewPatientDetails = () => {
+        router.push(`/patients/${patients.patient_id}`);
     };
+    // const viewPatientDetails = (patient) => {
+    //   router.push({ name: 'PatientDetails', params: { id: patient.patient_id } });
+    // };
+
 
     const changePage = (page) => {
         if (page >= 1 && page <= totalPages.value) {
@@ -672,15 +700,6 @@
         // Par exemple avec vue-toastification ou autre
     };
 
-    // Récupération des données
-    const fetchLocalisations = async () => {
-        try {
-            const response = await api.get('/v1/localisations');
-            localisations.value = response.data.data;
-        } catch (error) {
-            console.error('Erreur lors de la récupération des localisations:', error);
-        }
-    };
 
     // Lifecycle hooks
     onMounted(async () => {

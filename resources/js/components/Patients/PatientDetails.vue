@@ -221,10 +221,9 @@
                   @cancel="closeConsultationForm"
               />
           </div>
-
           <!-- Autres onglets... -->
       </div>
-  </div>
+      
   </template>
   
   <script setup>
@@ -232,14 +231,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePatients } from '@/composables/Patients/usePatients';
-import ConsultationsList from '@/components/Consultations/ConsultationsList.vue';
-import ExamensList from '@/components/Examen/ExamensList.vue';
-import DocumentsList from '@/components/Docx/DocumentsList.vue';
-import VaccinationsList from '@/components/Vaccinations/VaccinationsList.vue';
-import ConsultationModal from '@/components/modals/ConsultationModal.vue';
-import ExamenModal from '@/components/modals/ExamenModal.vue';
-import DocumentModal from '@/components/modals/DocumentModal.vue';
-import VaccinationModal from '@/components/modals/VaccinationModal.vue';
+
 
     // Route et Navigation
     const route = useRoute();
@@ -403,12 +395,12 @@ import VaccinationModal from '@/components/modals/VaccinationModal.vue';
 
     //consultation
 
-    import ConsultationsList from '../Consultations/ConsultationsList.vue';
-    import ConsultationDetails from '../Consultations/ConsultationDetails.vue';
-    import ConsultationForm from '../Consultations/ConsultationForm.vue';
+    // import ConsultationsList from '../Consultations/ConsultationsList.vue';
+    // import ConsultationDetails from '../Consultations/ConsultationDetails.vue';
+    // import ConsultationForm from '../Consultations/ConsultationForm.vue';
     
 // États
-const activeTab = ref('consultations');
+// const activeTab = ref('consultations');
 const selectedConsultation = ref(null);
 const showForm = ref(false);
 const editingConsultation = ref(null);

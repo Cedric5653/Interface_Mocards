@@ -21,22 +21,23 @@ export function usePatients() {
                 },
             })
             const response = await api.get('/v1/patients')
-            patients.value = response.data.data
-            setApiResponse(response.data)
-            return response.data
+            patients.value = response.data.data.data;
+            setApiResponse(response.data);
+            return response.data;
         } catch (error) {
-            console.error("Erreur lors de la récupération des patients:", error)
-            setApiResponse(error.response.data)
-            throw error
+            console.error("Erreur lors de la récupération des patients:", error);
+            setApiResponse(error.response.data);
+            throw error;
         }
     }
 
     // Créer patient
     const createPatient = async (patientData) => {
         try {
-            const response = await api.post('/v1/patients', patientData)
-            await fetchPatients()
-            return response.data
+            const response = await api.post('/v1/patients', patientData);
+            patients.value.push(response.data.data); 
+            // await fetchPatients();
+            return response.data;
         } catch (error) {
             console.error("Erreur lors de la création du patient:", error)
             throw error

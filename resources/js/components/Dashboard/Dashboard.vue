@@ -6,7 +6,7 @@
             <div class="header-content">
                 <div class="user-welcome">
                     <div class="user-avatar" @click="goToProfile">
-                        <img :src="userAvatar" :alt="user?.nom" v-if="userAvatar">
+                        <img :src="userAvatar" :alt="user?.nom || user?.username" v-if="userAvatar">
                         <div class="avatar-placeholder" v-else>
                             {{ getUserInitials() }}
                         </div>
@@ -14,7 +14,7 @@
                     <div class="welcome-text">
                         <h4>
                             Bienvenue, 
-                            <span>{{ getUserTitle() }} {{ user?.nom }}</span>
+                            <span>{{ getUserTitle() }} {{ user?.nom || user?.username }}</span>
                         </h4>
                         <p>{{ getCurrentDateTime() }}</p>
                     </div>
@@ -164,14 +164,14 @@ import DashboardNotification from './DashboardNotification.vue';
 import DashboardTask from './DashboardTask.vue';
 
 const router = useRouter();
-const { user } = useAuth();
+const { user,getUserProfile } = useAuth();
 const {
     stats,
     recentActivities,
     upcomingAppointments,
     alerts,
     loading,
-    authorizedActions, // Ajout de authorizedActions
+    // authorizedActions, // Ajout de authorizedActions
     fetchDashboardStats,
     fetchRecentActivities,
     fetchUpcomingAppointments,
@@ -201,25 +201,39 @@ const goToProfile = () => {
 
 
 const filteredStats = computed(() => {
-    if (!stats.value) return {};
-    
+    // if (!stats.value) return {};
+    // Ajoutez un fallback pour les données manquantes
+    const baseStats = {
+        patients: 0,
+        consultations: 0,
+        rendezVous: 0,
+        consultationsToday: 0,
+        weeklyAppointments: 0
+    };
     return {
+        // patients: {
+        //     value: stats.value.patients || 0,
+        //     label: 'Patients Total',
+        //     icon: 'fas fa-users',
+        //     type: 'patients',
+        //     change: stats.value.patientsChange
+        // },
         patients: {
-            value: stats.value.patients || 0,
+            value: stats.value?.patients || baseStats.patients,
             label: 'Patients Total',
             icon: 'fas fa-users',
             type: 'patients',
-            change: stats.value.patientsChange
+            change: stats.value?.patientsChange || 0
         },
         consultations: {
-            value: stats.value.consultations || 0,
+            value: stats.value.consultations || baseStats.consultations,
             label: 'Consultations',
             icon: 'fas fa-stethoscope',
             type: 'consultations',
             detail: `Aujourd'hui: ${stats.value.consultationsToday || 0}`
         },
         appointments: {
-            value: stats.value.rendezVous || 0,
+            value: stats.value.rendezVous || baseStats.rendezVous,
             label: 'RDV à venir',
             icon: 'fas fa-calendar-check',
             type: 'appointments',
@@ -229,16 +243,33 @@ const filteredStats = computed(() => {
 });
 
 // Méthodes
+
+
+// Modifiez la fonction getUserTitle
 const getUserTitle = () => {
-    const role = user.value?.role?.toLowerCase();
+    const roleName = user.value?.role?.role_name?.toLowerCase() || '';
     const titles = {
-        'medecin': 'Dr.',
+        'médecin': 'Dr.',
         'infirmier': 'Inf.',
         'admin': 'Admin.',
         'secouriste': 'Sec.'
     };
-    return titles[role] || '';
+    return titles[roleName] || '';
 };
+
+// Mettez à jour les authorizedActions
+const authorizedActions = computed(() => {
+    const roleName = user.value?.role?.role_name?.toLowerCase() || '';
+    
+    return {
+        canAddPatient: ['admin', 'médecin'].includes(roleName),
+        canAddAppointment: ['admin', 'médecin', 'infirmier'].includes(roleName),
+        canViewUrgent: true, // Tous les rôles
+        canManageDocuments: ['admin', 'médecin'].includes(roleName)
+    };
+});
+
+
 
 const getUserInitials = () => {
     if (!user.value?.nom) return '';
@@ -361,9 +392,14 @@ const handleNotificationAction = (notification) => {
 
 // Lifecycle hooks
 onMounted(() => {
+    if (!user.value) {
+        getUserProfile();
+    }
+    fetchDashboardStats();
     refreshDashboard();
     refreshInterval.value = setInterval(refreshDashboard, 300000);
 });
+
 
 onUnmounted(() => {
     if (refreshInterval.value) {
@@ -432,6 +468,19 @@ onUnmounted(() => {
     position: relative;
     overflow: hidden;
 }
+
+
+/* Assurez la cohérence des données manquantes */
+.stat-card .counter:empty::after {
+    content: "0";
+    opacity: 0.5;
+}
+
+/* Améliorez l'affichage des rôles */
+.badge.bg-info {
+    text-transform: capitalize;
+}
+
 
 .stat-card:hover {
     transform: translateY(-5px);
